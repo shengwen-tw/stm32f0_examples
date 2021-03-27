@@ -35,4 +35,4 @@ edit "~/.bashrc" and append the following instruction:
 PATH=$PATH:~/workspace/tools/gcc-arm-none-eabi-9-2019-q4-major/bin
 ```
 
-### 4. Restart the terminal
+### 3. Restart the terminal
