@@ -11,7 +11,8 @@ CFLAGS+=-mcpu=cortex-m0
 CFLAGS+=--specs=nano.specs --specs=nosys.specs -fno-builtin-printf -u _printf_float
 CFLAGS+=-Wall -Wno-address-of-packed-member -fno-strict-aliasing
 CFLAGS+=-D USE_FULL_LL_DRIVER \
-	-D STM32F051x8
+	-D STM32F051x8 \
+	-D PREFETCH_ENABLE=1
 
 CFLAGS+=-Wl,-T,./stm32f051r8_flash.ld
 
