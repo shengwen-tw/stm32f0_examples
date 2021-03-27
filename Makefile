@@ -29,8 +29,7 @@ SRC+=./lib/STM32F0xx_HAL_Driver/Src/stm32f0xx_ll_rcc.c \
 	./lib/STM32F0xx_HAL_Driver/Src/stm32f0xx_ll_tim.c \
 	./lib/STM32F0xx_HAL_Driver/Src/stm32f0xx_ll_utils.c
 
-SRC+=./stm32f0xx_it.c \
-	./syscalls.c \
+SRC+=./isr.c \
 	./main.c
 
 CFLAGS+=-I./lib/CMSIS/Include
