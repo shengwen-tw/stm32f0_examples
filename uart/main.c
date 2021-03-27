@@ -50,10 +50,11 @@ void uart_init(void)
 {
 	/* uart1: tx: pa9, rx: pa10 */
 
+	/* rcc initialization */
 	LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_USART1);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 
+	/* gpio initialization */
 	LL_GPIO_InitTypeDef gpio_init_struct = {
 		.Pin = LL_GPIO_PIN_9 | LL_GPIO_PIN_10,
 		.Mode = LL_GPIO_MODE_ALTERNATE,
@@ -64,6 +65,7 @@ void uart_init(void)
 	};
 	LL_GPIO_Init(GPIOA, &gpio_init_struct);
 
+	/* uart initialization */
 	LL_USART_InitTypeDef uart_init_struct = { 
 		.BaudRate = 9600,
 		.DataWidth = LL_USART_DATAWIDTH_8B,

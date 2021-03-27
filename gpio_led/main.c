@@ -47,10 +47,12 @@ void delay(volatile uint32_t count)
 
 void gpio_init(void)
 {
+	/* rcc initialization */
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
 
 	LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8 | LL_GPIO_PIN_9);
 
+	/* gpio initialization */
 	LL_GPIO_InitTypeDef gpio_init_struct = {
 	 	.Pin = LL_GPIO_PIN_8 | LL_GPIO_PIN_9,
 	  	.Mode = LL_GPIO_MODE_OUTPUT,
