@@ -46,23 +46,6 @@ void delay(volatile uint32_t count)
 	while(count--);
 }
 
-void gpio_init(void)
-{
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
-
-	LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8 | LL_GPIO_PIN_9);
-
-	LL_GPIO_InitTypeDef gpio_init_struct = {
-	 	.Pin = LL_GPIO_PIN_8 | LL_GPIO_PIN_9,
-	  	.Mode = LL_GPIO_MODE_OUTPUT,
-		.Speed = LL_GPIO_SPEED_FREQ_HIGH,
-		.OutputType = LL_GPIO_OUTPUT_PUSHPULL,
-		.Pull = LL_GPIO_PULL_NO
-	};
-
-	LL_GPIO_Init(GPIOC, &gpio_init_struct);
-}
-
 void uart_init(void)
 {
 	/* uart1: tx: pa9, rx: pa10 */
@@ -72,7 +55,7 @@ void uart_init(void)
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 
 	LL_GPIO_InitTypeDef gpio_init_struct = {
-		.Pin = LL_GPIO_PIN_9,
+		.Pin = LL_GPIO_PIN_9 | LL_GPIO_PIN_10,
 		.Mode = LL_GPIO_MODE_ALTERNATE,
 		.Speed = LL_GPIO_SPEED_FREQ_HIGH,
 		.OutputType = LL_GPIO_OUTPUT_PUSHPULL,
@@ -88,13 +71,18 @@ void uart_init(void)
 		.Parity = LL_USART_PARITY_NONE,
 		.TransferDirection = LL_USART_DIRECTION_TX | LL_USART_DIRECTION_RX,
 		.HardwareFlowControl = LL_USART_HWCONTROL_NONE,
-		/*.OverSampling = LL_USART_OVERSAMPLING_16*/
 	};
 	LL_USART_Init(USART1, &uart_init_struct);
 
 	LL_USART_DisableIT_CTS(USART1);
 	LL_USART_ConfigAsyncMode(USART1);
 	LL_USART_Enable(USART1);
+}
+
+char uart_getc(void)
+{
+	while(LL_USART_IsActiveFlag_RXNE(USART1) == 0);
+	return LL_USART_ReceiveData8(USART1);
 }
 
 void uart_putc(char data)
@@ -111,26 +99,15 @@ void uart_puts(char *string)
 	}
 }
 
-
 int main(void)
 {
 	system_clock_init();
-	gpio_init();
 	uart_init();
-
-	int led_on = 0;
 
 	uart_puts("hello world!\n\r");\
 
 	while(1) {
-		if(led_on) {
-			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8 | LL_GPIO_PIN_9);
-		} else {
-			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8 |LL_GPIO_PIN_9);
-		}
-
-		delay(1000000L);
-
-		led_on = (led_on + 1) % 2;
+		char received_data = uart_getc();
+		uart_putc(received_data);
 	}
 }
