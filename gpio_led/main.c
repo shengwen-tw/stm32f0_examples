@@ -49,10 +49,10 @@ void gpio_init(void)
 {
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
 
-	LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_9);
+	LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8 | LL_GPIO_PIN_9);
 
 	LL_GPIO_InitTypeDef gpio_init_struct = {
-	 	.Pin = LL_GPIO_PIN_9,
+	 	.Pin = LL_GPIO_PIN_8 | LL_GPIO_PIN_9,
 	  	.Mode = LL_GPIO_MODE_OUTPUT,
 		.Speed = LL_GPIO_SPEED_FREQ_HIGH,
 		.OutputType = LL_GPIO_OUTPUT_PUSHPULL,
@@ -71,9 +71,9 @@ int main(void)
 
 	while(1) {
 		if(led_on) {
-			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_9);
+			LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_8 | LL_GPIO_PIN_9);
 		} else {
-			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_9);
+			LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_8 |LL_GPIO_PIN_9);
 		}
 
 		delay(1000000L);
