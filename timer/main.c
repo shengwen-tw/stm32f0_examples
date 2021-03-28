@@ -76,7 +76,7 @@ void timer_init(void)
 
 	/* timer initialization */
 
-	/* 48MHz / (4800 * 10000) = 1 (interrupt triggering frequency) */
+	/* 48MHz / (4800 * 10000) = 1Hz (interrupt triggering frequency) */
 	LL_TIM_InitTypeDef timer_init_struct = {
 		.Prescaler = 4800 - 1,
 		.Autoreload = 10000,
