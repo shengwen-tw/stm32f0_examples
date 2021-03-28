@@ -32,14 +32,13 @@ void system_clock_init(void)
 	/* enable PLL and wait untill ready */
 	LL_RCC_PLL_Enable();
 	while(LL_RCC_PLL_IsReady() != 1);
+
+	/* enable system clock and wait utill ready */
 	LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 	LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
 	LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-
-	/* enable system clock and wait utill ready */
 	while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
-	LL_Init1msTick(48000000);
-	LL_SetSystemCoreClock(48000000);
+	LL_SetSystemCoreClock(48000000); //HCLK = 48Mhz
 }
 
 void delay(volatile uint32_t count)
