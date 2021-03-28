@@ -6,7 +6,10 @@ OBJCOPY=arm-none-eabi-objcopy
 GDB=arm-none-eabi-gdb
 SIZE=arm-none-eabi-size
 
-CFLAGS=-g -O2 -mlittle-endian -mfloat-abi=soft -mthumb -flto
+#check the following bug discussion of the link time optimization (-flto)
+#official bug report (still exists in GCC9): https://bugs.launchpad.net/gcc-arm-embedded/+bug/1747966
+#workaround: https://stackoverflow.com/a/57414702
+CFLAGS=-g -O2 -mlittle-endian -mfloat-abi=soft -mthumb #-flto
 CFLAGS+=-mcpu=cortex-m0
 CFLAGS+=--specs=nano.specs --specs=nosys.specs -fno-builtin-printf -u _printf_float
 CFLAGS+=-Wall -Wno-address-of-packed-member -fno-strict-aliasing
