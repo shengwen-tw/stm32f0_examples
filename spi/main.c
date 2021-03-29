@@ -127,11 +127,11 @@ void spi1_init(void)
 	LL_SPI_InitTypeDef spi_init_struct = {
 		.TransferDirection = LL_SPI_FULL_DUPLEX,
 		.Mode = LL_SPI_MODE_MASTER,
-		.DataWidth = LL_SPI_DATAWIDTH_4BIT,
+		.DataWidth = LL_SPI_DATAWIDTH_8BIT,
 		.ClockPolarity = LL_SPI_POLARITY_LOW,
 		.ClockPhase = LL_SPI_PHASE_1EDGE,
 		.NSS = LL_SPI_NSS_SOFT,
-		.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV4, //12Mbits/s
+		.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV64, //0.75Mbits/s
 		.BitOrder = LL_SPI_MSB_FIRST,
 		.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
 		.CRCPoly = 7
@@ -139,6 +139,7 @@ void spi1_init(void)
 	LL_SPI_Init(SPI1, &spi_init_struct);
 	LL_SPI_SetStandard(SPI1, LL_SPI_PROTOCOL_MOTOROLA);
 	LL_SPI_EnableNSSPulseMgt(SPI1);
+	LL_SPI_Enable(SPI1);
 }
 
 void spi2_init(void)
@@ -165,11 +166,11 @@ void spi2_init(void)
 	LL_SPI_InitTypeDef spi_init_struct = {
 		.TransferDirection = LL_SPI_FULL_DUPLEX,
 		.Mode = LL_SPI_MODE_MASTER,
-		.DataWidth = LL_SPI_DATAWIDTH_4BIT,
+		.DataWidth = LL_SPI_DATAWIDTH_8BIT,
 		.ClockPolarity = LL_SPI_POLARITY_LOW,
 		.ClockPhase = LL_SPI_PHASE_1EDGE,
 		.NSS = LL_SPI_NSS_SOFT,
-		.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV4, //12Mbits/s
+		.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV64, //0.75Mbits/s
 		.BitOrder = LL_SPI_MSB_FIRST,
 		.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
 		.CRCPoly = 7
@@ -177,16 +178,21 @@ void spi2_init(void)
 	LL_SPI_Init(SPI2, &spi_init_struct);
 	LL_SPI_SetStandard(SPI2, LL_SPI_PROTOCOL_MOTOROLA);
 	LL_SPI_EnableNSSPulseMgt(SPI2);
+	LL_SPI_Enable(SPI2);
 }
 
-uint8_t spi_read_write(SPI_TypeDef *spi_channel, uint8_t data)
+void spi_write(SPI_TypeDef *spi_channel, uint8_t data)
 {
 	while(LL_SPI_IsActiveFlag_TXE(spi_channel) == 0);
 	LL_SPI_TransmitData8(spi_channel, data);
+}
 
+uint8_t spi_read(SPI_TypeDef *spi_channel)
+{
 	while(LL_SPI_IsActiveFlag_RXNE(spi_channel) == 0);
 	return LL_SPI_ReceiveData8(spi_channel);
 }
+
 
 int main(void)
 {
@@ -195,8 +201,6 @@ int main(void)
 
 	spi1_init();
 	spi2_init();
-
-	uart_puts("hello world!\n\r");\
 
 	/* connect spi1 to spi2 as following:
 	 * pa5 <-> pb13
@@ -211,7 +215,7 @@ int main(void)
 
 	while(1) {
 		/* spi1 send string */
-		spi_read_write(SPI1, s[send_index]);
+		spi_write(SPI1, s[send_index]);
 		if(send_index == (s_size - 1)) {
 			send_index = 0;
 		} else {
