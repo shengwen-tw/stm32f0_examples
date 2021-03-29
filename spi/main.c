@@ -12,6 +12,8 @@
 #include "stm32f0xx_ll_usart.h"
 #include "stm32f0xx_ll_spi.h"
 
+volatile uint8_t recvd_spi_data;
+
 void system_clock_init(void)
 {
 	/* power on */
@@ -45,61 +47,6 @@ void system_clock_init(void)
 void delay(volatile uint32_t count)
 {
 	while(count--);
-}
-
-void uart_init(void)
-{
-	/* uart1: tx: pa9, rx: pa10 */
-
-	/* rcc initialization */
-	LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_USART1);
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
-
-	/* gpio initialization */
-	LL_GPIO_InitTypeDef gpio_init_struct = {
-		.Pin = LL_GPIO_PIN_9 | LL_GPIO_PIN_10,
-		.Mode = LL_GPIO_MODE_ALTERNATE,
-		.Speed = LL_GPIO_SPEED_FREQ_HIGH,
-		.OutputType = LL_GPIO_OUTPUT_PUSHPULL,
-		.Pull = LL_GPIO_PULL_NO,
-		.Alternate = LL_GPIO_AF_1
-	};
-	LL_GPIO_Init(GPIOA, &gpio_init_struct);
-
-	/* uart initialization */
-	LL_USART_InitTypeDef uart_init_struct = { 
-		.BaudRate = 9600,
-		.DataWidth = LL_USART_DATAWIDTH_8B,
-		.StopBits = LL_USART_STOPBITS_1,
-		.Parity = LL_USART_PARITY_NONE,
-		.TransferDirection = LL_USART_DIRECTION_TX | LL_USART_DIRECTION_RX,
-		.HardwareFlowControl = LL_USART_HWCONTROL_NONE,
-	};
-	LL_USART_Init(USART1, &uart_init_struct);
-
-	LL_USART_DisableIT_CTS(USART1);
-	LL_USART_ConfigAsyncMode(USART1);
-	LL_USART_Enable(USART1);
-}
-
-char uart_getc(void)
-{
-	while(LL_USART_IsActiveFlag_RXNE(USART1) == 0);
-	return LL_USART_ReceiveData8(USART1);
-}
-
-void uart_putc(char data)
-{
-	while(LL_USART_IsActiveFlag_TXE(USART1) == 0);
-	LL_USART_TransmitData8(USART1, (uint8_t)data);
-	while(LL_USART_IsActiveFlag_TC(USART1) == 0);
-}
-
-void uart_puts(char *string)
-{
-	for(; *string != '\0'; string++) {
-		uart_putc(*string);
-	}
 }
 
 void spi1_init(void)
@@ -142,74 +89,34 @@ void spi1_init(void)
 	LL_SPI_Enable(SPI1);
 }
 
-void spi2_init(void)
-{
-	/* pb13 -> spi2_sck
-         * pb14 -> spi2_miso
-         * pb15 -> spi2_mosi */
-
-	/* rcc initialization */
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
-	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2);
-
-	/* gpio initialization */
-	LL_GPIO_InitTypeDef gpio_init_struct = {
-		.Pin = LL_GPIO_PIN_13 | LL_GPIO_PIN_14 | LL_GPIO_PIN_15,
-		.Mode = LL_GPIO_MODE_ALTERNATE,
-		.Speed = LL_GPIO_SPEED_FREQ_HIGH,
-		.OutputType = LL_GPIO_OUTPUT_PUSHPULL,
-		.Pull = LL_GPIO_PULL_NO,
-		.Alternate = LL_GPIO_AF_0
-	};
-	LL_GPIO_Init(GPIOB, &gpio_init_struct);
-
-	LL_SPI_InitTypeDef spi_init_struct = {
-		.TransferDirection = LL_SPI_FULL_DUPLEX,
-		.Mode = LL_SPI_MODE_MASTER,
-		.DataWidth = LL_SPI_DATAWIDTH_8BIT,
-		.ClockPolarity = LL_SPI_POLARITY_LOW,
-		.ClockPhase = LL_SPI_PHASE_1EDGE,
-		.NSS = LL_SPI_NSS_SOFT,
-		.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV64, //0.75Mbits/s
-		.BitOrder = LL_SPI_MSB_FIRST,
-		.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
-		.CRCPoly = 7
-	};
-	LL_SPI_Init(SPI2, &spi_init_struct);
-	LL_SPI_SetStandard(SPI2, LL_SPI_PROTOCOL_MOTOROLA);
-	LL_SPI_EnableNSSPulseMgt(SPI2);
-	LL_SPI_Enable(SPI2);
-}
-
+/* pooling mode spi write */
 void spi_write(SPI_TypeDef *spi_channel, uint8_t data)
 {
 	while(LL_SPI_IsActiveFlag_TXE(spi_channel) == 0);
 	LL_SPI_TransmitData8(spi_channel, data);
 }
 
+/* pooling mode spi read */
 uint8_t spi_read(SPI_TypeDef *spi_channel)
 {
 	while(LL_SPI_IsActiveFlag_RXNE(spi_channel) == 0);
 	return LL_SPI_ReceiveData8(spi_channel);
 }
 
-
 int main(void)
 {
 	system_clock_init();
-	uart_init();
-
 	spi1_init();
-	spi2_init();
 
-	/* connect spi1 to spi2 as following:
-	 * pa5 <-> pb13
-	 * pa6 <-> pb15
-	 * pa7 <-> pb14 */
+	/* observe spi1 using a logic analyzer with the following settings:
+	 * sample frequency: > 2Mhz 
+	 * CS (chip selection): none
+	 * CPOL = 0 
+	 * CPHA = 0
+	 * 8bits mode
+	 * MSB first */
 
-	/* observe the spi communication with uart1 */
-
-	char *s = "hello spi\n\r";
+	char *s = "hello\n\r";
 	int s_size = strlen(s);
 	int send_index = 0;
 
@@ -221,16 +128,7 @@ int main(void)
 		} else {
 			send_index++;
 		}
+
 		delay(50000L);
-
-#if 0
-		/* spi2 receive string */
-		uint8_t recvd_data = spi_read_write(SPI2, 0x00);
-
-		/* if spi2 received non-zero char then print it via uart1 */
-		if(recvd_data != 0x00) {
-			uart_putc(recvd_data);
-		}
-#endif
 	}
 }
