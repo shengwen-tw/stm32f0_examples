@@ -116,5 +116,8 @@ int main(void)
 	system_clock_init();
 	pwm_init();
 
+	/* to shut down the complementary output: */
+	//LL_TIM_CC_DisableChannel(TIM1, LL_TIM_CHANNEL_CH1 | LL_TIM_CHANNEL_CH1N);
+
 	while(1);
 }
