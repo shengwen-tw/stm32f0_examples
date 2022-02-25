@@ -91,7 +91,7 @@ void pwm_init(void)
 		.OCMode = LL_TIM_OCMODE_PWM1,
 		.OCState = LL_TIM_OCSTATE_DISABLE,
 		.OCNState = LL_TIM_OCSTATE_DISABLE,
-		.CompareValue = 800, //800/1600 = 50%
+		.CompareValue = 1200, //duty = 1200/1600 = 75%
 		.OCPolarity = LL_TIM_OCPOLARITY_HIGH
 	};
 	LL_TIM_OC_Init(TIM1, LL_TIM_CHANNEL_CH1, &timer_oc_init_struct);
