@@ -84,6 +84,28 @@ void pwm_init(void)
 
 	LL_TIM_SetTriggerOutput(TIM1, LL_TIM_TRGO_RESET);
 
+#if 1   /* dead time insertion */
+	//introduction: https://www.youtube.com/watch?v=rDaC2N-33Oo
+
+	//timer_counter_cycle_ns = ((10^9)/ core_freq * tim_prescaler)
+	//e.g: T_ns = ((10^9)/ 48000000 * 1) = 20.8333...
+
+	//dead_time_config = (desired_dead_time_ns / timer_counter_cycle_ns) + 1
+	//e.g.: dead_time_config = (400 / 20.833) + 1 = 20 (closest integer)
+
+	/* initialize timer BDTR (break dead time register) */
+	LL_TIM_BDTR_InitTypeDef timer_bdtr_init_struct = {
+		.OSSRState= LL_TIM_OSSR_DISABLE,
+		.OSSIState = LL_TIM_OSSI_DISABLE,
+		.LockLevel = LL_TIM_LOCKLEVEL_OFF,
+		.DeadTime = 20, //400ns
+		.BreakState = LL_TIM_BREAK_ENABLE,
+		.BreakPolarity = LL_TIM_BREAK_POLARITY_HIGH,
+		.AutomaticOutput = LL_TIM_AUTOMATICOUTPUT_DISABLE
+	};
+	LL_TIM_BDTR_Init(TIM1, &timer_bdtr_init_struct);
+#endif
+
 	/* timer oc initialization */
 	LL_TIM_OC_EnablePreload(TIM1, LL_TIM_CHANNEL_CH1);
 
@@ -91,7 +113,7 @@ void pwm_init(void)
 		.OCMode = LL_TIM_OCMODE_PWM1,
 		.OCState = LL_TIM_OCSTATE_DISABLE,
 		.OCNState = LL_TIM_OCSTATE_DISABLE,
-		.CompareValue = 1200, //duty = 1200/1600 = 75%
+		.CompareValue = 800, //duty = 1200/1600 = 75%
 		.OCPolarity = LL_TIM_OCPOLARITY_HIGH
 	};
 	LL_TIM_OC_Init(TIM1, LL_TIM_CHANNEL_CH1, &timer_oc_init_struct);
