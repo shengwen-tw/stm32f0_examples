@@ -73,7 +73,7 @@ void pwm_init(void)
 	//48MHz / (1 * 1600) = 30KHz (pwm frequency)
 	LL_TIM_InitTypeDef timer_init_struct = {
 		.Prescaler = 1 - 1,
-		.CounterMode = LL_TIM_COUNTERMODE_UP,
+		.CounterMode = LL_TIM_COUNTERMODE_CENTER_UP,
 		.Autoreload = 1600 - 1,
 		.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1
 	};
@@ -113,7 +113,7 @@ void pwm_init(void)
 		.OCMode = LL_TIM_OCMODE_PWM1,
 		.OCState = LL_TIM_OCSTATE_DISABLE,
 		.OCNState = LL_TIM_OCSTATE_DISABLE,
-		.CompareValue = 800, //duty = 1200/1600 = 75%
+		.CompareValue = 250, //duty = 1200/1600 = 75%
 		.OCPolarity = LL_TIM_OCPOLARITY_HIGH
 	};
 	LL_TIM_OC_Init(TIM1, LL_TIM_CHANNEL_CH1, &timer_oc_init_struct);
