@@ -83,11 +83,11 @@ void pwm_timer1_init(void)
 	LL_GPIO_Init(GPIOA, &timer1_init_struct);
 
 	/* timer initialization */
-	//48MHz / (1 * 1600) = 30KHz (pwm frequency)
+	//48MHz / (120 * 100) = 4000Hz (pwm frequency)
 	LL_TIM_InitTypeDef timer_init_struct = {
-		.Prescaler = 1 - 1,
+		.Prescaler = 120 - 1,
 		.CounterMode = LL_TIM_COUNTERMODE_CENTER_UP,
-		.Autoreload = 1600 - 1,
+		.Autoreload = 100 - 1,
 		.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1
 	};
 	LL_TIM_Init(TIM1, &timer_init_struct);
@@ -182,8 +182,8 @@ void pulse_output(uint32_t pulse_number)
 	LL_TIM_EnableIT_UPDATE(TIM2);
 	LL_TIM_EnableCounter(TIM2);
 
-	LL_TIM_SetAutoReload(TIM1, 1600);
-	LL_TIM_OC_SetCompareCH1(TIM1, 800);
+	LL_TIM_SetAutoReload(TIM1, 100);
+	LL_TIM_OC_SetCompareCH1(TIM1, 50);
 	LL_TIM_EnableCounter(TIM1);
 }
 
