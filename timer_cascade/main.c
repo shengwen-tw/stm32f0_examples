@@ -113,6 +113,12 @@ void timer1_init(void)
 
 	LL_TIM_DisableARRPreload(TIM1);
 
+	/* set timer 1 as master to the timer 2 */
+	LL_TIM_SetSlaveMode(TIM1, LL_TIM_SLAVEMODE_TRIGGER);
+	LL_TIM_SetTriggerInput(TIM1, LL_TIM_TS_ITR2);
+	LL_TIM_SetTriggerOutput(TIM1, LL_TIM_TRGO_OC1REF);
+	LL_TIM_EnableMasterSlaveMode(TIM1);
+
 	/* timer oc initialization */
 	LL_TIM_OC_EnablePreload(TIM1, LL_TIM_CHANNEL_CH1);
 
@@ -155,7 +161,7 @@ void timer2_init(void)
 	/* 48MHz / (1 * 320) = 150KHz */
 	LL_TIM_InitTypeDef timer_init_struct = {
 		.Prescaler = 1 - 1,
-		.Autoreload = 320 - 1,
+		.Autoreload = 1/*320 - 1*/,
 		.CounterMode = LL_TIM_COUNTERMODE_UP,
 		.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1,
 	};
